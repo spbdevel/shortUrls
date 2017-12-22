@@ -1,6 +1,7 @@
 
 
 Application is configured to work with H2 inmemory database - no configuration is needed.
+Requirements:  Java 8  + maven
 
 To run application in Tomcat Embeded mode:
 mvn spring-boot:run

@@ -131,8 +131,27 @@
      public void checkDuplicateRedirects() {
          redirectService.getRedirectUrl(SHORT_URL_1);
          redirectService.getRedirectUrl(SHORT_URL_1);
+         assertTrue(true);
+         redirectService.getRedirectUrl(SHORT_URL_2);
          redirectService.getRedirectUrl(SHORT_URL_2);
          assertTrue(true);
+     }
+
+     @Test
+     @WithMockUser(username = accountName2, roles = "USER")
+     public void redirectNotExistingUrl() {
+         RegisteredURL redirectUrl = redirectService.getRedirectUrl("");
+         assertNull(redirectUrl);
+     }
+
+     @Test
+     public void redirectNotAuthorized() {
+         try {
+             RegisteredURL redirectUrl = redirectService.getRedirectUrl(SHORT_URL_1);
+             fail();
+         } catch (Exception e) {
+             assertTrue(true);
+         }
      }
 
  }

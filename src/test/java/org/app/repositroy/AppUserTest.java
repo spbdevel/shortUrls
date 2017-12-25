@@ -68,7 +68,6 @@
          assertTrue(accounts.size() > 0);
      }
 
-     @Ignore
      @Test
      public void findByName() {
          AppUser account = appUserRepository.findByAccountName(accountName1);

@@ -31,9 +31,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.List;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,13 +75,18 @@ public class ConfControllerTests {
         acnt = createAccount(accountName2, "pass2");
         appUserRepository.save(acnt);
 
-        AppUser admin = appUserRepository.findByAccountName("admin");
+        AppUser acc1 = appUserRepository.findByAccountName(accountName1);
 
         RegisteredURL registeredURL = new RegisteredURL();
-        registeredURL.setAccount(admin);
+        registeredURL.setAccount(acc1);
         registeredURL.setLongUrl(url);
         registeredURL.setShortUrl("http://asdf");
         registeredURLRepository.save(registeredURL);
+
+        Stats stats = new Stats();
+        stats.setUrl(registeredURL);
+        stats.setUser(acc1);
+        statsRepository.save(stats);
     }
 
 
@@ -105,7 +107,6 @@ public class ConfControllerTests {
 
 
 
-    @Ignore
     @Test
     public void accountCreate() throws Exception {
         AccountReq acnt = new AccountReq();
@@ -115,7 +116,7 @@ public class ConfControllerTests {
         logger.info(s);
         ResultActions perform = mvc.perform(post("/account/")
                 .contentType(MediaType.APPLICATION_JSON).content(s));
-        perform.andExpect(status().isOk());
+        perform.andExpect(status().isCreated());
 
         MockHttpServletResponse response  = perform.andReturn().getResponse();
         logger.info("resp: " + response.getContentAsString());
@@ -123,7 +124,6 @@ public class ConfControllerTests {
     }
 
 
-    @Ignore
     @Test
     public void accountAlreadyExist() throws Exception {
         AccountReq acnt = new AccountReq();
@@ -184,7 +184,7 @@ public class ConfControllerTests {
 
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = accountName1, roles = "USER")
     public void regExistedValidUrl() throws Exception {
         UrlReq rUrl = new UrlReq();
         rUrl.setUrl(url);
@@ -192,7 +192,7 @@ public class ConfControllerTests {
         String s = mapper.writeValueAsString(rUrl);
         ResultActions perform = mvc.perform(post("/register/")
                 .contentType(MediaType.APPLICATION_JSON).content(s));
-        perform.andExpect(status().isCreated());
+        perform.andExpect(status().isFound());
 
         MockHttpServletResponse response = perform.andReturn().getResponse();
         logger.info("resp: " + response.getContentAsString());
@@ -200,7 +200,7 @@ public class ConfControllerTests {
 
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = accountName1, roles = "USER")
     public void regNewValidUrl() throws Exception {
         UrlReq rUrl = new UrlReq();
         rUrl.setUrl("http://new.url.com");
@@ -215,19 +215,12 @@ public class ConfControllerTests {
     }
 
 
-
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = accountName1, roles = "USER")
     public void accountStats() throws Exception {
-        RegisteredURL registeredURL = registeredURLRepository.findAll().get(0);
-        Stats stats = new Stats();
-        stats.setUrl(registeredURL);
-        stats.setUser(registeredURL.getAccount());
-        statsRepository.save(stats);
-
         ResultActions perform = mvc.perform(
                 get("/statistic")
-                .header("AccountId", "admin"))
+                .header("AccountId", accountName1))
                 .andExpect(status().isOk());
         MockHttpServletResponse response = perform.andReturn().getResponse();
         logger.info("resp: " + response.getContentAsString());

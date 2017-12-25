@@ -227,10 +227,5 @@ public class ConfControllerTests {
     }
 
 
-    @Test
-    public void findUserEager(){
-        AppUser acc1 = appUserRepository.findByAccountNameWithRoles(accountName1);
-        assertNotNull(acc1);
-    }
 
 }

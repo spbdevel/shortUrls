@@ -21,6 +21,7 @@
  import java.util.Date;
  import java.util.List;
 
+ import static junit.framework.TestCase.assertNotNull;
  import static org.junit.Assert.*;
 
  @RunWith(SpringRunner.class)
@@ -108,5 +109,10 @@
          }
      }
 
+     @Test
+     public void findUserEager(){
+         AppUser acc1 = appUserRepository.findByAccountNameWithRoles(accountName1);
+         assertNotNull(acc1);
+     }
 
  }

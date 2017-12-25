@@ -48,7 +48,7 @@ public class RedirectService {
             stat.setUrl(url);
             counter = stat.getCounter();
         }
-        stat.setCounter(counter + 1);
+        stat.setCounter(++counter);
         logger.debug(url.getLongUrl() +", counter: " + counter);
         try {
             //TODO  put this to optiomistic lock transaction

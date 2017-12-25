@@ -128,13 +128,25 @@
 
      @Test
      @WithMockUser(username = accountName2, roles = "USER")
-     public void checkDuplicateRedirects() {
+     public void checkRedirectsCounter() {
+         RegisteredURL redirectUrl1;
          redirectService.getRedirectUrl(SHORT_URL_1);
          redirectService.getRedirectUrl(SHORT_URL_1);
+         redirectService.getRedirectUrl(SHORT_URL_1);
+         redirectService.getRedirectUrl(SHORT_URL_1);
+         redirectUrl1 = redirectService.getRedirectUrl(SHORT_URL_1);
          assertTrue(true);
+         Stats stat1 = statsRepository.findByUserAndUrl(redirectUrl1.getAccount(), redirectUrl1);
+         assertNotNull(stat1);
+         assertEquals(5,stat1.getCounter().intValue());
          redirectService.getRedirectUrl(SHORT_URL_2);
          redirectService.getRedirectUrl(SHORT_URL_2);
+         redirectService.getRedirectUrl(SHORT_URL_2);
          assertTrue(true);
+         RegisteredURL redirectUrl2 = redirectService.getRedirectUrl(SHORT_URL_2);
+         Stats stat2 = statsRepository.findByUserAndUrl(redirectUrl2.getAccount(), redirectUrl2);
+         assertNotNull(stat2);
+         assertEquals(4,stat2.getCounter().intValue());
      }
 
      @Test

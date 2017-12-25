@@ -14,7 +14,6 @@ import org.app.repository.RegisteredURLRepository;
 import org.app.repository.StatsRepository;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -31,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import static junit.framework.TestCase.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -227,5 +227,10 @@ public class ConfControllerTests {
     }
 
 
+    @Test
+    public void findUserEager(){
+        AppUser acc1 = appUserRepository.findByAccountNameWithRoles(accountName1);
+        assertNotNull(acc1);
+    }
 
 }

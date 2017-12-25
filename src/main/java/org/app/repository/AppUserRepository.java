@@ -20,7 +20,7 @@ public interface AppUserRepository extends AbstractRepository<AppUser> {
     @QueryHints({
             @QueryHint(name = HINT_READONLY, value = "true"),
             @QueryHint(name = "org.hibernate.cacheable", value = "true")})
-    @Query("from AppUser u join fetch u.roles r WHERE u.accountName = :name")
+    @Query("from AppUser u left join fetch u.roles r WHERE u.accountName = :name")
     AppUser findByAccountNameWithRoles(@Param("name") String name);
 
 

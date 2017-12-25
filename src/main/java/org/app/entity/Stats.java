@@ -24,7 +24,7 @@ public class Stats implements Serializable {
     }
 
 
-    @OneToOne(optional=false, fetch = FetchType.LAZY)
+    @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     public AppUser getUser() {
         return user;
@@ -34,7 +34,7 @@ public class Stats implements Serializable {
         this.user = user;
     }
 
-    @OneToOne(optional=false, fetch = FetchType.LAZY)
+    @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(name = "url_id")
     public RegisteredURL getUrl() {
         return url;

@@ -21,7 +21,7 @@ public interface RegisteredURLRepository extends AbstractRepository<RegisteredUR
     @QueryHints({
             @QueryHint(name = HINT_READONLY, value = "true"),
             @QueryHint(name = "org.hibernate.cacheable", value = "true")})
-    List<RegisteredURL> findByLongUrlAndAccountId(String shortUrl, Long id);
+    RegisteredURL findByLongUrlAndAccountId(String longUrl, Long id);
 
     @QueryHints({
             @QueryHint(name = HINT_READONLY, value = "true"),

@@ -8,21 +8,19 @@
  import org.app.repository.AppUserRepository;
  import org.app.repository.RegisteredURLRepository;
  import org.app.repository.StatsRepository;
+ import org.app.service.RedirectService;
  import org.junit.After;
  import org.junit.Before;
- import org.junit.Ignore;
  import org.junit.Test;
  import org.junit.runner.RunWith;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.boot.test.context.SpringBootTest;
- import org.springframework.dao.DataIntegrityViolationException;
+ import org.springframework.security.test.context.support.WithMockUser;
  import org.springframework.test.context.junit4.SpringRunner;
  import org.springframework.test.context.web.WebAppConfiguration;
 
- import javax.validation.ConstraintViolationException;
- import java.util.Date;
  import java.util.List;
 
  import static org.junit.Assert.*;
@@ -44,22 +42,35 @@
      @Autowired
      private StatsRepository statsRepository;
 
-     private final String accountName1 = "aname1";
-     private final String accountName2 = "aname2";
+     @Autowired
+     private RedirectService redirectService;
+
+    private final String accountName1 = "aname1";
+    private final String accountName2 = "aname2";
+    private final String longUrl1 = "long url 1";
+    private final String longUrl2 = "long url 2";
+    private final String SHORT_URL_1 = "short url 1";
+    private final String SHORT_URL_2 = "short url 2";
 
 
      @Before
      public void initData() {
-         AppUser acnt = createAccount(accountName1, "pass1");
-         appUserRepository.save(acnt);
-         acnt = createAccount(accountName2, "pass2");
-         appUserRepository.save(acnt);
+         AppUser acnt1 = createAccount(accountName1, "pass1");
+         appUserRepository.save(acnt1);
+         AppUser acnt2 = createAccount(accountName2, "pass2");
+         appUserRepository.save(acnt2);
 
-         RegisteredURL rurl = createRegisteredURL(acnt, "long url 1", "short url 1");
-         registeredURLRepository.save(rurl);
-         rurl = createRegisteredURL(acnt, "long url 2", "short url 2");
-         registeredURLRepository.save(rurl);
-     }
+        RegisteredURL rurl = createRegisteredURL(acnt2, longUrl1, SHORT_URL_1);
+        registeredURLRepository.save(rurl);
+        RegisteredURL rurl2 = rurl = createRegisteredURL(acnt2, longUrl2, SHORT_URL_2);
+        registeredURLRepository.save(rurl);
+
+        Stats stats = new Stats();
+        stats.setUrl(rurl2);
+        stats.setUser(acnt2);
+        statsRepository.save(stats);
+
+    }
 
      @After
      public void clean() {
@@ -86,38 +97,42 @@
      }
 
 
-     @Test
-     public void saveAndFind() {
-         //List<AppUser> all = appUserRepository.saveAndFind();
-         List<RegisteredURL> all = registeredURLRepository.findAll();
-         Stats stats = new Stats();
-         RegisteredURL url = all.get(0);
-         stats.setUrl(url);
-         stats.setUser(url.getAccount());
-         statsRepository.save(stats);
-         List<Stats> alls = statsRepository.findAll();
-         assertNotNull(alls);
-         assertTrue(all.size() > 0);
-         logger.info(alls.toString());
-     }
+    @Test
+    public void saveAndFind() {
+        List<Stats> alls = statsRepository.findAll();
+        assertNotNull(alls);
+        assertTrue(alls.size() > 0);
+        logger.info(alls.toString());
+    }
 
 
 
-     @Test
-     public void findByUserAndUrl() {
-         List<RegisteredURL> urls = registeredURLRepository.findAll();
-         List<AppUser> usrs = appUserRepository.findAll();
-         statsRepository.findByUserAndUrl(usrs.get(0), urls.get(0));
-     }
+    @Test
+    public void findByUserAndUrl() {
+        AppUser user = appUserRepository.findByAccountName(accountName2);
+        RegisteredURL url = registeredURLRepository.findByLongUrlAndAccountId(longUrl2, user.getId());
+        Stats stat = statsRepository.findByUserAndUrl(user, url);
+        assertNotNull(stat);
+    }
 
 
 
      @Test
      public void findByUser() {
          List<AppUser> usrs = appUserRepository.findAll();
+         assertTrue(usrs.size() > 0);
          statsRepository.findByUser(usrs.get(0));
+         assertTrue(true);
      }
 
 
+     @Test
+     @WithMockUser(username = accountName2, roles = "USER")
+     public void checkDuplicateRedirects() {
+         redirectService.getRedirectUrl(SHORT_URL_1);
+         redirectService.getRedirectUrl(SHORT_URL_1);
+         redirectService.getRedirectUrl(SHORT_URL_2);
+         assertTrue(true);
+     }
 
  }

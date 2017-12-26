@@ -27,9 +27,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,18 +72,18 @@ public class ConfControllerTests {
                 .webAppContextSetup(context)
                 .defaultRequest(get("/").with(testSecurityContext()))
                 .build();
-        AppUser acnt = createAccount(accountName1, "pass1");
-        appUserRepository.save(acnt);
+        AppUser acnt1 = createAccount(accountName1, "pass1");
+        appUserRepository.save(acnt1);
 
-        acnt = createAccount(accountName2, "pass2");
-        appUserRepository.save(acnt);
+        AppUser acnt2 = createAccount(accountName2, "pass2");
+        appUserRepository.save(acnt2);
 
         AppUser acc1 = appUserRepository.findByAccountName(accountName1);
 
         RegisteredURL registeredURL = new RegisteredURL();
         registeredURL.setAccount(acc1);
         registeredURL.setLongUrl(url);
-        registeredURL.setShortUrl("http://asdf");
+        registeredURL.setShortUrl("asdf");
         registeredURLRepository.save(registeredURL);
 
         Stats stats = new Stats();
@@ -226,6 +230,35 @@ public class ConfControllerTests {
         logger.info("resp: " + response.getContentAsString());
     }
 
+
+
+    @Test
+    @WithMockUser(username = accountName1, roles = "USER")
+    public void redirectShortUrl() throws Exception {
+        AppUser user = appUserRepository.findByAccountName(accountName1);
+        RegisteredURL regURl = registeredURLRepository.findByLongUrlAndAccountId(url, user.getId());
+        String shortUrl = regURl.getShortUrl();
+        Integer redirectType = regURl.getRedirectType();
+        MvcResult mvcResult = mvc.perform(
+                get("/" + shortUrl))
+                .andExpect(status().is(redirectType))
+                .andReturn();
+        assertNotNull(mvcResult);
+        String location = mvcResult.getResponse().getHeader("Location");
+        assertNotNull(location);
+        assertEquals(location, regURl.getLongUrl());
+    }
+
+
+    @Test
+    @WithMockUser(username = accountName1, roles = "USER")
+    public void redirectUrlNotExist() throws Exception {
+        String shortUrl = "ssss";
+        mvc.perform(
+                get("/" + shortUrl))
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andReturn();
+    }
 
 
 }

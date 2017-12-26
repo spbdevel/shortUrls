@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -39,6 +40,7 @@ public class ConfController extends  AbstractController {
     }
 
 
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UrlResponse> registerUrl(@RequestBody UrlReq url) {
         HttpStatus status = HttpStatus.CREATED;
@@ -51,6 +53,7 @@ public class ConfController extends  AbstractController {
     }
 
 
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/statistic", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> accountStats(
             @RequestHeader("AccountId") String accountName) {

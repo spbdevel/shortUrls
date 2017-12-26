@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import static junit.framework.TestCase.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -170,6 +169,7 @@ public class ConfControllerTests {
 
 
     @Test
+    @WithMockUser(username = accountName1, roles = "USER")
     public void regNullUrl() throws Exception {
         UrlReq rUrl = new UrlReq();
         ObjectMapper mapper = new ObjectMapper();

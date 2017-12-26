@@ -40,6 +40,7 @@ public class RegisteredURL implements Serializable {
         this.id = id;
     }
 
+    @NotNull
     @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     public AppUser getAccount() {

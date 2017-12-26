@@ -2,6 +2,7 @@ package org.app.entity;
 
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -21,6 +22,7 @@ public class Role implements Serializable {
         this.id = id;
     }
 
+    @NotNull
     @Column(name = "rname", nullable = false, unique = true)
     public String getName() {
         return name;

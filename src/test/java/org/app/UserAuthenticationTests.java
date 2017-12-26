@@ -16,9 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {AppConfig.class, CustomWebSecurity.class} )
 @WebAppConfiguration
@@ -45,13 +43,12 @@ public class UserAuthenticationTests {
 
 
 
-    @Ignore
     @Test
-    public void requestProtectedUrlWithUser() throws Exception {
+    public void accessRegisterWithoutAuthentication() throws Exception {
         mvc
                 .perform(get("/register"))
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(unauthenticated());
+                .andExpect(unauthenticated())
+        ;
     }
 
 

@@ -2,6 +2,7 @@ package org.app.entity;
 
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -25,6 +26,7 @@ public class Stats implements Serializable {
     }
 
 
+    @NotNull
     @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     public AppUser getUser() {
@@ -35,6 +37,7 @@ public class Stats implements Serializable {
         this.user = user;
     }
 
+    @NotNull
     @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(name = "url_id")
     public RegisteredURL getUrl() {

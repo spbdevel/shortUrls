@@ -15,6 +15,7 @@ public class Stats implements Serializable {
     private RegisteredURL url;
     private int counter;
     private long id;
+    private int version;
 
 
     @Id
@@ -56,6 +57,14 @@ public class Stats implements Serializable {
         this.id = id;
     }
 
+    @Version
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     @Override
     public String toString() {
@@ -64,6 +73,7 @@ public class Stats implements Serializable {
                 ", url=" + url.getId() +
                 ", counter=" + counter +
                 ", id=" + id +
+                ", version=" + version +
                 '}';
     }
 }

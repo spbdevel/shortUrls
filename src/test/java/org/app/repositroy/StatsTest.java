@@ -17,6 +17,7 @@
  import org.slf4j.LoggerFactory;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.orm.ObjectOptimisticLockingFailureException;
  import org.springframework.security.test.context.support.WithMockUser;
  import org.springframework.test.context.junit4.SpringRunner;
  import org.springframework.test.context.web.WebAppConfiguration;
@@ -164,6 +165,20 @@
          } catch (Exception e) {
              assertTrue(true);
          }
+     }
+
+
+     @Test(expected = ObjectOptimisticLockingFailureException.class)
+     public void getOptimisticLockingException() {
+         AppUser user = appUserRepository.findByAccountName(accountName2);
+         RegisteredURL url = registeredURLRepository.findByLongUrlAndAccountId(longUrl2, user.getId());
+         Stats stat1 = statsRepository.findByUserAndUrl(user, url);
+         Stats stat2 = statsRepository.findByUserAndUrl(user, url);
+         stat1.setCounter(10);
+         stat2.setCounter(20);
+         statsRepository.save(stat1);
+         statsRepository.save(stat2);
+         fail();
      }
 
  }

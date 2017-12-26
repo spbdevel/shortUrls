@@ -51,7 +51,6 @@ public class RedirectService {
         stat.setCounter(++counter);
         logger.debug(url.getLongUrl() +", counter: " + counter);
         try {
-            //TODO  put this to optiomistic lock transaction
             statsRepository.save(stat);
         } catch (Throwable e) {
             logger.error("error on updating stats: " + e.getMessage());

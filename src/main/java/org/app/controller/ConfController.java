@@ -36,7 +36,7 @@ public class ConfController extends  AbstractController {
         if(!account.getFound())
             status = HttpStatus.CONFLICT;
 
-        return new ResponseEntity(account, status);
+        return new ResponseEntity<>(account, status);
     }
 
 
@@ -44,11 +44,18 @@ public class ConfController extends  AbstractController {
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UrlResponse> registerUrl(@RequestBody UrlReq url) {
         HttpStatus status = HttpStatus.CREATED;
-        UrlResponse urlResponse = confService.register(url);
-        if(urlResponse.isFound())
-            status = HttpStatus.FOUND;
-        if(urlResponse.isBadRequest())
-            status = HttpStatus.BAD_REQUEST;
+        UrlResponse urlResponse;
+        try {
+            urlResponse = confService.register(url);
+            if(urlResponse.isFound())
+                status = HttpStatus.FOUND;
+            if(urlResponse.isBadRequest())
+                status = HttpStatus.BAD_REQUEST;
+        } catch (Exception e) {
+            urlResponse = new UrlResponse();
+            urlResponse.setDescription("internal error: " + e.getMessage());
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
         return new ResponseEntity<>(urlResponse, status);
     }
 

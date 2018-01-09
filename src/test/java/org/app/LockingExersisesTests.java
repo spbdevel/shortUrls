@@ -6,9 +6,9 @@ import org.app.entity.Stats;
 import org.app.repository.AppUserRepository;
 import org.app.repository.RegisteredURLRepository;
 import org.app.repository.StatsRepository;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 @SpringBootTest(classes = {AppConfig.class})
 @RunWith(SpringRunner.class)
-public class LockingExersises {
+public class LockingExersisesTests {
 
-    private static Logger logger = LoggerFactory.getLogger(LockingExersises.class);
+    private static Logger logger = LoggerFactory.getLogger(LockingExersisesTests.class);
 
     @Autowired
     private EntityManagerFactory emf;
@@ -51,6 +52,37 @@ public class LockingExersises {
     private final String longUrl2 = "long url 2";
     private final String SHORT_URL_1 = "short url 1";
     private final String SHORT_URL_2 = "short url 2";
+
+    //static long seqStart = 0;
+
+    protected void logInfo(Description description, String status, long nanos) {
+        String testName = description.getMethodName();
+        logger.info(String.format("Test %s %s, spent %d milliseconds",
+                testName, status, TimeUnit.NANOSECONDS.toMillis(nanos)));
+    }
+
+    @Rule
+    public Stopwatch stopwatch = new Stopwatch() {
+        @Override
+        protected void succeeded(long nanos, Description description) {
+            logInfo(description, "succeeded", nanos);
+        }
+
+        @Override
+        protected void failed(long nanos, Throwable e, Description description) {
+            logInfo(description, "failed", nanos);
+        }
+
+        @Override
+        protected void skipped(long nanos, AssumptionViolatedException e, Description description) {
+            logInfo(description, "skipped", nanos);
+        }
+
+        @Override
+        protected void finished(long nanos, Description description) {
+            logInfo(description, "finished", nanos);
+        }
+    };
 
 
     @Before
@@ -182,18 +214,31 @@ public class LockingExersises {
 
 
     private void twoConcurentTransactions(LockModeType modeType1, LockModeType modeType2, Map map) {
+        //seqStart++;
         EntityManager em1 = emf.createEntityManager(map);
         EntityManager em2 = emf.createEntityManager(map);
         EntityTransaction tx1 = em1.getTransaction();
         EntityTransaction tx2 = em2.getTransaction();
 
+        class Find {
+            Stats first(EntityManager em) {
+                return (Stats) em.createQuery("from Stats")
+                        .setMaxResults(1)
+                        .getResultList()
+                        .get(0);
+            }
+        }
+
         try {
             tx1.begin();
-            Stats stats = (Stats) em1.createQuery("from Stats").getResultList().get(0);
+            Find find = new Find();
+            //Stats stats = em1.find(Stats.class, seqStart, map);
+            Stats stats = find.first(em1);
             logger.info("try to lock 1: " + stats);
             em1.lock(stats, modeType1);
             tx2.begin();
-            Stats stats2 = (Stats) em2.createQuery("from Stats").getResultList().get(0);
+            //Stats stats2 = em2.find(Stats.class, seqStart, map);
+            Stats stats2 =  find.first(em2);
             logger.info("try to lock 2: " + stats2);
 
             //on pessimistic/pessimistic this lock fails

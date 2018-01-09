@@ -42,7 +42,7 @@ public class UserAuthenticationTests {
 
 
 
-
+    @Ignore
     @Test
     public void accessRegisterWithoutAuthentication() throws Exception {
         mvc
